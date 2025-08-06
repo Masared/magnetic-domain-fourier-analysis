@@ -4,7 +4,7 @@ def calculate_radial_profile(power_spectrum):
     """
     
     2Dパワースペクトルから動径プロファイル（1D）を計算する関数。
-    中心からの各半径におけるパワーの平均値を返します。
+    中心からの各半径の円周上におけるパワーの平均値を返します。
 
     Args:
         power_spectrum (np.ndarray): 2Dのパワースペクトル画像。
@@ -20,15 +20,18 @@ def calculate_radial_profile(power_spectrum):
     y, x = np.indices(power_spectrum.shape)
     
     # 各ピクセルの中心からの距離を計算
+    #radii:各ピクセルの中心からの距離の2D配列
     radii = np.sqrt((x - center_x)**2 + (y - center_y)**2)
     
     # 距離を整数に丸めて、各半径のビン（入れ物）として使う
+    #小数点以下を切り捨て
     radii_int = radii.astype(int)
+    # 各半径ビンに含まれるピクセル数を計算，インデックスが半径に該当，値がピクセル数
 
-    # 各半径ビンに含まれるピクセル数を計算 (重みなしのbincount)
     pixel_counts = np.bincount(radii_int.ravel())
-    
+    print(pixel_counts)
     # 各半径ビンにおけるパワーの合計値を計算 (重み付きのbincount)
+    #スペクトルの画像を1Dに並列し，半径ごとの合計値を算出．radii_intには，半径の情報が入っている．power_sumのindexがその半径のピクセル全ての合計値
     power_sum = np.bincount(radii_int.ravel(), weights=power_spectrum.ravel())
 
     # 0除算を避けるため、ピクセル数が0のビンは平均も0にする
@@ -53,21 +56,21 @@ if __name__ == '__main__':
     # 関数を呼び出して動径プロファイルを計算
     features_1d = calculate_radial_profile(mock_mag)
     
-    print("--- 動径プロファイルから得られた特徴量ベクトル ---")
-    print(features_1d)
+    # print("--- 動径プロファイルから得られた特徴量ベクトル ---")
+    # print(features_1d)
     print("\n特徴量ベクトルの長さ:", len(features_1d))
 
-    # 結果をプロットして確認
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.imshow(mock_mag, cmap='viridis')
-    plt.title('Mock Power Spectrum (`mag`)')
+    # # 結果をプロットして確認
+    # import matplotlib.pyplot as plt
+    # plt.figure(figsize=(12, 5))
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(mock_mag, cmap='viridis')
+    # plt.title('Mock Power Spectrum (`mag`)')
     
-    plt.subplot(1, 2, 2)
-    plt.plot(features_1d)
-    plt.title('Radial Profile (Feature Vector)')
-    plt.xlabel('Radius (Spatial Frequency)')
-    plt.ylabel('Average Power')
-    plt.grid(True)
-    plt.show()
+    # plt.subplot(1, 2, 2)
+    # plt.plot(features_1d)
+    # plt.title('Radial Profile (Feature Vector)')
+    # plt.xlabel('Radius (Spatial Frequency)')
+    # plt.ylabel('Average Power')
+    # plt.grid(True)
+    # plt.show()
